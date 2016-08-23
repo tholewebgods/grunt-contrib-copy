@@ -71,7 +71,20 @@ module.exports = function(grunt) {
       files: 0
     };
 
-    this.files.forEach(function(filePair) {
+    // expand config that might be a function
+    var files = grunt.util._.result(this.data, "files");
+
+    if (typeof this.data.files === "function") {
+      // grunt config was not able to apply process() on a config function
+      // redo it expliitly
+      files = grunt.config.process(files);
+    }
+
+    // redo config normalization that would actually be done in Grunt's
+    // task registration
+    files = grunt.task.normalizeMultiTaskFiles({ files: files }, this.target);
+
+    files.forEach(function(filePair) {
       isExpandedPair = filePair.orig.expand || false;
 
       filePair.src.forEach(function(src) {
